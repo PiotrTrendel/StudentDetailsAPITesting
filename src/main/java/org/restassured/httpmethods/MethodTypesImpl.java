@@ -1,12 +1,13 @@
-package org.restassured.base.impl;
+package org.restassured.httpmethods;
 
 import io.restassured.response.Response;
 import org.json.simple.JSONObject;
+import org.restassured.base.BaseResponse;
 import org.restassured.base.IHttpMethodTypes;
 
 import java.util.Map;
 
-public class MethodTypesImpl extends BaseResponseImpl implements IHttpMethodTypes {
+public class MethodTypesImpl extends BaseResponse implements IHttpMethodTypes {
 
     public Response sendGetRequest(String endpoint) {
         return sendRequest("GET", endpoint, null, null, null, null);
@@ -25,7 +26,7 @@ public class MethodTypesImpl extends BaseResponseImpl implements IHttpMethodType
     }
 
     public Response sendPutRequest(String endpoint, JSONObject payload, Map<String, String> pathParams) {
-        return sendRequest("PUT", endpoint, null, null, null, payload);
+        return sendRequest("PUT", endpoint, null, null, pathParams, payload);
     }
 
     public Response sendDeleteRequest(String endpoint, Map<String, String> pathParams) {

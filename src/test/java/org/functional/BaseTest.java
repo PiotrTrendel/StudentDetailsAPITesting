@@ -1,53 +1,75 @@
-package org.base;
+package org.functional;
 
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import lombok.Getter;
 import org.json.simple.JSONObject;
 import org.restassured.data.Student;
-import org.restassured.response.StudentDetailsActions;
+import static org.restassured.enums.TestContext.*;
+import org.restassured.actions.StudentDetailsActions;
+import org.testng.ITestContext;
 import org.testng.annotations.*;
-import org.utils.ConfigManager;
-import static org.utils.JsonUtils.getStudentAsJson;
+import static org.utils.ConfigManager.*;
+import org.utils.JsonUtils;
 
 import org.utils.TestDataProvider;
 
-/**
- * Unit test for simple App.
- */
+import static java.net.HttpURLConnection.*;
+
+@Getter
 public class BaseTest {
 
-    StudentDetailsActions response = new StudentDetailsActions();
+    StudentDetailsActions studentsDetails = new StudentDetailsActions();
 
-    private Student student;
+    private Student testStudent;
+
+    private Response studentAdditionResponse;
 
     @Factory(dataProvider = "testData", dataProviderClass = TestDataProvider.class)
-    public BaseTest(Student student) {
-        this.student = student;
+    public BaseTest(Student testStudent) {
+        this.testStudent = testStudent;
     }
 
     @BeforeSuite
     public void setBaseUrl() {
-        RestAssured.baseURI = ConfigManager.getConfigProperty("base.url");
+        RestAssured.baseURI = getConfigProperty("base.url");
     }
 
-    @BeforeTest
-    public void addTestUser() {
-        JSONObject payload = getStudentAsJson(student);
-        response.addStudentDetails(payload).then().log().all();
+    @BeforeMethod
+    public void setContextAttributes(ITestContext ctx) {
+        try {
+            String testStudentMidName = studentAdditionResponse.then().extract().response().path("middle_name");
+            ctx.setAttribute(getAttrName(MIDDLE_NAME), testStudentMidName);
+        } catch (NullPointerException ex) {
+            ctx.setAttribute(getAttrName(MIDDLE_NAME), "");
+        }
+        try {
+            String testStudentFirstName = studentAdditionResponse.then().extract().response().path("first_name");
+            ctx.setAttribute(getAttrName(FIRST_NAME), testStudentFirstName);
+        } catch (NullPointerException ex) {
+            ctx.setAttribute(getAttrName(FIRST_NAME), "");
+        }
+        int testStudentId = studentAdditionResponse.then().extract().response().path("id");
+        ctx.setAttribute(getAttrName(STUDENT_ID), testStudentId);
     }
 
-    @Test
-    public void checkCreatedUser() {
+    @BeforeClass(description = "test student is added to list of students details")
+    public void addTestStudent(ITestContext ctx) {
+        JSONObject payload = JsonUtils.getStudentAsJson(testStudent);
+        studentAdditionResponse = studentsDetails.addStudentDetails(payload);
 
-
-        response.getAllStudentsDetails().then().log().all();
-
+        studentAdditionResponse.then().assertThat().statusCode(HTTP_CREATED);
     }
 
-    @AfterTest
-    public void deleteCreatedUser() {
-        Response students = response.getAllStudentsDetails();
-        System.out.println(students.body().asString());
+    @AfterClass(alwaysRun = true, description = "test student is deleted from list of students details after all tests")
+    public void deleteCreatedStudent(ITestContext ctx) {
+        int studentId = (Integer) ctx.getAttribute(getAttrName(STUDENT_ID));
+        Response studentRemovalResponse = studentsDetails.deleteStudentDetails(String.valueOf(studentId));
+
+        studentRemovalResponse.then().assertThat().statusCode(HTTP_OK);
     }
+
+
 }
+

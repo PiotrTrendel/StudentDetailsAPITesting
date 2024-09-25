@@ -1,0 +1,15 @@
+{
+  "students": [
+    {
+      "first_name": "test",
+      "middle_name": "tester",
+      "last_name": "testowy123",
+      "date_of_birth": "01-01-1900"
+    },
+    {
+      "first_name": "Piotr",
+      "last_name": "Kowalski",
+      "date_of_birth": "01-01-1990"
+    }
+  ]
+}

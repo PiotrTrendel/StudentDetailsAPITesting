@@ -1,4 +1,4 @@
-package org.restassured.utilities;
+package org.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.restassured.response;
+package org.restassured.actions;
 
 import io.restassured.response.Response;
 import org.json.simple.JSONObject;
@@ -19,16 +19,6 @@ public class StudentDetailsActions extends MethodTypesImpl {
         idParam.put("id", id);
         return sendGetRequest(getConfigProperty("single-student-details.endpoint"), idParam);
     }
-
-    public Response getStudentsDetailsSortedByFirstName(String firstName, String lastName) {
-        Map<String, String> studentNameParams = new HashMap<>();
-        studentNameParams.put("first_name", firstName);
-        studentNameParams.put("last_name", lastName);
-        return sendGetRequest(getConfigProperty("students-details.endpoint"), null, studentNameParams);
-    }
-
-
-//    public int getUserIdByName(String )
 
     public Response updateStudentDetails(String id, JSONObject payload) {
         Map<String, String> idParam = new HashMap<> ();

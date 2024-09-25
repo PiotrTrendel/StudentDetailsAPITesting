@@ -1,18 +1,15 @@
-package org.restassured.base.impl;
+package org.restassured.base;
 
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.json.simple.JSONObject;
-import org.restassured.base.IBaseResponse;
-import org.utils.ConfigManager;
 
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 
-public class BaseResponseImpl implements IBaseResponse {
+public class BaseResponse {
 
     public Response sendRequest(String method, String endpoint, Map<String, String> headers,
                                 Map<String, String> queryParams, Map<String, String> pathParams, JSONObject payload) {
@@ -32,23 +29,30 @@ public class BaseResponseImpl implements IBaseResponse {
             request.body(payload);
         }
 
+        request.log().uri().and().log().method();
+
         Response response;
+
         switch (method.toUpperCase()) {
             case "GET":
-                response = request.get(endpoint);
+                response = request.when().get(endpoint);
                 break;
             case "POST":
-                response = request.post(endpoint);
+                response = request.when().post(endpoint);
                 break;
             case "PUT":
-                response = request.put(endpoint);
+                response = request.when().put(endpoint);
                 break;
             case "DELETE":
-                response = request.delete(endpoint);
+                response = request.when().delete(endpoint);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown HTTP method: " + method);
         }
+
+        response.then().log().status();
+        System.out.println();
+
         return response;
     }
 
